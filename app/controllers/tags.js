@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -13,7 +12,7 @@ var mongoose = require('mongoose')
 exports.index = function (req, res) {
   var criteria = { tags: req.param('tag') }
   var perPage = 5
-  var page = req.param('page') > 0 ? req.param('page') : 0
+  var page = (req.param('page') > 0 ? req.param('page') : 1) - 1
   var options = {
     perPage: perPage,
     page: page,
@@ -24,10 +23,10 @@ exports.index = function (req, res) {
     if (err) return res.render('500')
     Article.count(criteria).exec(function (err, count) {
       res.render('articles/index', {
-        title: 'List of Articles',
+        title: 'Articles tagged ' + req.param('tag'),
         articles: articles,
-        page: page,
-        pages: count / perPage
+        page: page + 1,
+        pages: Math.ceil(count / perPage)
       })
     })
   })

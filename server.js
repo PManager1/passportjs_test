@@ -22,7 +22,6 @@ var express = require('express')
 // if test env, load example file
 var env = process.env.NODE_ENV || 'development'
   , config = require('./config/config')[env]
-  , auth = require('./config/middlewares/authorization')
   , mongoose = require('mongoose')
 
 // Bootstrap db connection
@@ -31,7 +30,7 @@ mongoose.connect(config.db)
 // Bootstrap models
 var models_path = __dirname + '/app/models'
 fs.readdirSync(models_path).forEach(function (file) {
-  require(models_path+'/'+file)
+  if (~file.indexOf('.js')) require(models_path + '/' + file)
 })
 
 // bootstrap passport config
@@ -42,10 +41,10 @@ var app = express()
 require('./config/express')(app, config, passport)
 
 // Bootstrap routes
-require('./config/routes')(app, passport, auth)
+require('./config/routes')(app, passport)
 
 // Start the app by listening on <port>
-var port = process.env.PORT || 3000
+var port = process.env.PORT || 80
 app.listen(port)
 console.log('Express app started on port '+port)
 

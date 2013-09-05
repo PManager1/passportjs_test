@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -7,23 +6,25 @@ var mongoose = require('mongoose')
   , Schema = mongoose.Schema
   , crypto = require('crypto')
   , _ = require('underscore')
-  , authTypes = ['github', 'twitter', 'facebook', 'google']
+  , authTypes = ['github', 'twitter', 'facebook', 'google', 'linkedin']
 
 /**
  * User Schema
  */
 
 var UserSchema = new Schema({
-  name: String,
-  email: String,
-  username: String,
-  provider: String,
-  hashed_password: String,
-  salt: String,
+  name: { type: String, default: '' },
+  email: { type: String, default: '' },
+  username: { type: String, default: '' },
+  provider: { type: String, default: '' },
+  hashed_password: { type: String, default: '' },
+  salt: { type: String, default: '' },
+  authToken: { type: String, default: '' },
   facebook: {},
   twitter: {},
   github: {},
-  google: {}
+  google: {},
+  linkedin: {}
 })
 
 /**
@@ -60,6 +61,20 @@ UserSchema.path('email').validate(function (email) {
   if (authTypes.indexOf(this.provider) !== -1) return true
   return email.length
 }, 'Email cannot be blank')
+
+UserSchema.path('email').validate(function (email, fn) {
+  var User = mongoose.model('User')
+  
+  // if you are authenticating by any of the oauth strategies, don't validate
+  if (authTypes.indexOf(this.provider) !== -1) fn(true)
+
+  // Check only when it is a new user or when email field is modified
+  if (this.isNew || this.isModified('email')) {
+    User.find({ email: email }).exec(function (err, users) {
+      fn(!err && users.length === 0)
+    })
+  } else fn(true)
+}, 'Email already exists')
 
 UserSchema.path('username').validate(function (username) {
   // if you are authenticating by any of the oauth strategies, don't validate
@@ -102,7 +117,7 @@ UserSchema.methods = {
    * @api public
    */
 
-  authenticate: function(plainText) {
+  authenticate: function (plainText) {
     return this.encryptPassword(plainText) === this.hashed_password
   },
 
@@ -113,7 +128,7 @@ UserSchema.methods = {
    * @api public
    */
 
-  makeSalt: function() {
+  makeSalt: function () {
     return Math.round((new Date().valueOf() * Math.random())) + ''
   },
 
@@ -125,9 +140,15 @@ UserSchema.methods = {
    * @api public
    */
 
-  encryptPassword: function(password) {
+  encryptPassword: function (password) {
     if (!password) return ''
-    return crypto.createHmac('sha1', this.salt).update(password).digest('hex')
+    var encrypred
+    try {
+      encrypred = crypto.createHmac('sha1', this.salt).update(password).digest('hex')
+      return encrypred
+    } catch (err) {
+      return ''
+    }
   }
 }
 

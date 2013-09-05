@@ -4,24 +4,48 @@
  */
 
 var mongoose = require('mongoose')
-  , Imager = require('imager')
-  , async = require('async')
   , Article = mongoose.model('Article')
+  , utils = require('../../lib/utils')
   , _ = require('underscore')
 
 /**
- * Find article by id
+ * Load
  */
 
-exports.article = function(req, res, next, id){
+exports.load = function(req, res, next, id){
   var User = mongoose.model('User')
 
   Article.load(id, function (err, article) {
     if (err) return next(err)
-    if (!article) return next(new Error('Failed to load article ' + id))
+    if (!article) return next(new Error('not found'))
     req.article = article
     next()
   })
+}
+
+/**
+ * List
+ */
+
+exports.index = function(req, res){
+  var page = (req.param('page') > 0 ? req.param('page') : 1) - 1
+  var perPage = 30
+  var options = {
+    perPage: perPage,
+    page: page
+  }
+
+  Article.list(options, function(err, articles) {
+    if (err) return res.render('500')
+    Article.count().exec(function (err, count) {
+      res.render('articles/index', {
+        title: 'Articles',
+        articles: articles,
+        page: page + 1,
+        pages: Math.ceil(count / perPage)
+      })
+    })
+  })  
 }
 
 /**
@@ -44,16 +68,16 @@ exports.create = function (req, res) {
   article.user = req.user
 
   article.uploadAndSave(req.files.image, function (err) {
-    if (err) {
-      res.render('articles/new', {
-        title: 'New Article',
-        article: article,
-        errors: err.errors
-      })
+    if (!err) {
+      req.flash('success', 'Successfully created article!')
+      return res.redirect('/articles/'+article._id)
     }
-    else {
-      res.redirect('/articles/'+article._id)
-    }
+
+    res.render('articles/new', {
+      title: 'New Article',
+      article: article,
+      errors: utils.errors(err.errors || err)
+    })
   })
 }
 
@@ -63,7 +87,7 @@ exports.create = function (req, res) {
 
 exports.edit = function (req, res) {
   res.render('articles/edit', {
-    title: 'Edit '+req.article.title,
+    title: 'Edit ' + req.article.title,
     article: req.article
   })
 }
@@ -77,21 +101,20 @@ exports.update = function(req, res){
   article = _.extend(article, req.body)
 
   article.uploadAndSave(req.files.image, function(err) {
-    if (err) {
-      res.render('articles/edit', {
-        title: 'Edit Article',
-        article: article,
-        errors: err.errors
-      })
+    if (!err) {
+      return res.redirect('/articles/' + article._id)
     }
-    else {
-      res.redirect('/articles/' + article._id)
-    }
+
+    res.render('articles/edit', {
+      title: 'Edit Article',
+      article: article,
+      errors: err.errors
+    })
   })
 }
 
 /**
- * View an article
+ * Show
  */
 
 exports.show = function(req, res){
@@ -108,32 +131,7 @@ exports.show = function(req, res){
 exports.destroy = function(req, res){
   var article = req.article
   article.remove(function(err){
-    // req.flash('notice', 'Deleted successfully')
+    req.flash('info', 'Deleted successfully')
     res.redirect('/articles')
-  })
-}
-
-/**
- * List of Articles
- */
-
-exports.index = function(req, res){
-  var page = req.param('page') > 0 ? req.param('page') : 0
-  var perPage = 15
-  var options = {
-    perPage: perPage,
-    page: page
-  }
-
-  Article.list(options, function(err, articles) {
-    if (err) return res.render('500')
-    Article.count().exec(function (err, count) {
-      res.render('articles/index', {
-        title: 'List of Articles',
-        articles: articles,
-        page: page,
-        pages: count / perPage
-      })
-    })
   })
 }

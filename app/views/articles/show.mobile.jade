@@ -1,4 +1,5 @@
-extends ../layouts/default
+extends ../layouts/mobile
+
 
 block main
   h1= article.title
@@ -8,10 +9,9 @@ block content
     .span9
       p=article.body
       .meta.muted
-        - if (article.user)
-          - var name = article.user.name ? article.user.name : article.user.username
-          p Author -&nbsp;
-            a(href="/users/"+article.user._id)= name
+        - var name = article.user.name ? article.user.name : article.user.username
+        p Author -&nbsp;
+          a(href="/users/"+article.user._id)= name
         p.muted= formatDate(article.createdAt, "%b %d, %Y at %I:%M %p")
         - if (article.tags)
           .tags
