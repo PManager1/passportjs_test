@@ -22,7 +22,7 @@ module.exports = function (app, config, passport) {
   }))
 
   app.use(express.favicon())
-  app.use(express.static(config.root + '/public'))
+  // app.use(express.static(config.root + '/public')) 
 
   // don't use logger for test env
   if (process.env.NODE_ENV !== 'test') {
@@ -40,21 +40,28 @@ module.exports = function (app, config, passport) {
       next()
     })
 
+    app.use(express.static(config.root + '/public'))
+
+
     // cookieParser should be above session
     app.use(express.cookieParser())
 
     // bodyParser should be above methodOverride
     app.use(express.bodyParser())
-    app.use(express.methodOverride())
+  
 
-    // express/mongo session storage
+   // express/mongo session storage
     app.use(express.session({
       secret: 'noobjs',
       store: new mongoStore({
         url: config.db,
         collection : 'sessions'
       })
-    }))
+    }))  
+
+
+    app.use(express.methodOverride())
+
 
     // use passport session
     app.use(passport.initialize())
