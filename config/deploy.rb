@@ -1,5 +1,5 @@
 set :application, "indiadilse"
-set :repository,  "https://github.com/jaipratik/nodejs-express-mongoose-demo2"
+set :repository,  "https://github.com/jaipratik/passportjs_test"
 
 set :scm, :git # You can set :scm explicitly or Capistrano will make an intelligent guess based on known version control directory names
 # Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `perforce`, `subversion` or `none`
