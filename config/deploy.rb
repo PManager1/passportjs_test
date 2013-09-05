@@ -21,7 +21,7 @@ set :scm, :git
 
 set :deploy_to, "/home/ubuntu/sites/#{application}"
 set :use_sudo, false
-set :keep_releases, 3
+set :keep_releases, 1
 
 
 set :branch, "master"

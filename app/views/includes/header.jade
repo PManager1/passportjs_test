@@ -9,8 +9,7 @@ header#header
               a(href="/articles/new", title="new article") New
           ul.nav.pull-right
             li
-              iframe(style="border: 0; margin: 10px 0 0 0; padding: 0;", src="https://www.gittip.com/madhums/widget.html", width="48pt", height="22pt")
-
+              
             if (req.isAuthenticated())
               li
                 a(href="/users/"+req.user.id, title="Profile") Profile
