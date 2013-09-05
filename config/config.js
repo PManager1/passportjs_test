@@ -29,7 +29,7 @@ module.exports = {
     twitter: {
       clientID: "NhNCwt2r41x3AAG9OSH5yQ",
       clientSecret: "T7rsTCFyKOyby7aeXtt92HK9NizJVBfH3LoV6uVp3A",
-      callbackURL: "indiadilse.com"
+      callbackURL: "http://localhost/auth/twitter/callback"
     },
     github: {
       clientID: 'APP_ID',
