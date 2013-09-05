@@ -12,7 +12,7 @@ role :db,  "174.129.18.232"
 
 
 
-set :deploy_via, :copy
+set :deploy_via, :remote_cache
 set :copy_exclude, [".git", ".DS_Store"]
 
 default_run_options[:pty] =  true
@@ -21,7 +21,7 @@ set :scm, :git
 
 set :deploy_to, "/home/ubuntu/sites/#{application}"
 set :use_sudo, false
-set :keep_releases, 1
+set :keep_releases, 3
 
 
 set :branch, "master"
